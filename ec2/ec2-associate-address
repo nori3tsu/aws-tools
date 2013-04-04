@@ -1,0 +1,47 @@
+#! /bin/sh
+# chkconfig: 35 55 25
+# description: ec2-associate-address
+
+### config
+EIP=
+###
+
+INSTANCE_ID=`curl http://169.254.169.254/latest/meta-data/instance-id`
+
+. /etc/init.d/functions
+. /etc/profile.d/aws-apitools-common.sh
+
+if [ ! -f /etc/sysconfig/aws.env ]; then
+    exit 6;
+fi
+
+. /etc/sysconfig/aws.env
+export EC2_URL
+export EC2_REGION
+export EC2_HOME
+export AWS_ACCESS_KEY=$AWS_ACCESS_KEY_ID
+export AWS_SECRET_KEY=$AWS_SECRET_ACCESS_KEY
+
+start() {
+    ec2-associate-address -i $INSTANCE_ID $EIP --region $EC2_REGION
+}
+
+stop() {
+    ec2-disassociate-address $EIP --region $EC2_REGION
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    sleep 3
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage $0 [start|stop|restart]"
+esac
