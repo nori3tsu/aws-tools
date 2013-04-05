@@ -3,7 +3,7 @@
 # description: ec2-associate-address
 
 ### config
-EIP=
+eip=
 ###
 
 . /etc/init.d/functions
@@ -14,18 +14,13 @@ if [ ! -f /etc/sysconfig/aws.env ]; then
 fi
 
 . /etc/sysconfig/aws.env
-export EC2_URL
-export EC2_REGION
-export EC2_HOME
-export AWS_ACCESS_KEY=$AWS_ACCESS_KEY_ID
-export AWS_SECRET_KEY=$AWS_SECRET_ACCESS_KEY
 
 start() {
-    ec2-associate-address -i $INSTANCE_ID $EIP --region $EC2_REGION
+    ec2-associate-address -i $instance_id $eip --region ap-northeast-1
 }
 
 stop() {
-    ec2-disassociate-address $EIP --region $EC2_REGION
+    ec2-disassociate-address $eip --region ap-northeast-1
 }
 
 case "$1" in
