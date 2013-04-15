@@ -3,7 +3,7 @@
 # description: ec2-associate-address
 
 ### config
-eip=
+EIP=
 ###
 
 . /etc/init.d/functions
@@ -16,11 +16,13 @@ fi
 . /etc/sysconfig/aws.env
 
 start() {
-    ec2-associate-address -i $instance_id $eip --region ap-northeast-1
+    echo "Start... [instance_id: $INSTANCE_ID, EIP: $EIP"
+    ec2-associate-address -i $INSTANCE_ID $EIP --region ap-northeast-1
 }
 
 stop() {
-    ec2-disassociate-address $eip --region ap-northeast-1
+    echo "Stop..."
+    ec2-disassociate-address $EIP --region ap-northeast-1
 }
 
 case "$1" in
