@@ -26,6 +26,7 @@ start() {
    if [ ! -z "$HOSTNAME" ]
    then
       /bin/hostname $HOSTNAME
+      /bin/sed -i "s/^\(127.0.0.1.*localhost localhost.localdomain\).*/\1 ${HOSTNAME}/g" /etc/hosts
    fi
    return $?
 }
