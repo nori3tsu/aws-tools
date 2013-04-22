@@ -2,9 +2,6 @@
 # chkconfig: 35 55 25
 # description: ec2-associate-address
 
-### config
-EIP=
-###
 
 . /etc/init.d/functions
 . /etc/profile.d/aws-apitools-common.sh
@@ -14,6 +11,13 @@ if [ ! -f /etc/sysconfig/aws.env ]; then
 fi
 
 . /etc/sysconfig/aws.env
+
+EIP=`ec2-tag-search.sh EIP`
+
+if [ ${EIP:-NONE} = "NONE" ]; then
+    echo "EIP tag can not be found."
+    exit 1;
+fi
 
 start() {
     echo "Start... [instance_id: $INSTANCE_ID, EIP: $EIP"
