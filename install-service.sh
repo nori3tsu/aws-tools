@@ -7,7 +7,7 @@ export PATH=$PATH:/bin:/sbin
 
 SERVICE_NAME=$1
 if [ ! -f $ROOT_DIR/service/$SERVICE_NAME ]; then
-        echo "�T�[�r�X$1�͑��݂��܂���B"
+        echo "サービス$1は存在しません。"
         exit 1
 fi
 
