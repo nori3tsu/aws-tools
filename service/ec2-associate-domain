@@ -1,12 +1,6 @@
 #! /bin/sh
 # chkconfig: 35 55 25
 # description: ec2-associate-domain
-#
-# ê›íË:
-# 1. install-service.sh ec2-associate-domain
-# 2. vim /etc/sysconfig/ec2-associate-domain
-# 3. vim /root/.aws-secrets
-#
 
 . /etc/init.d/functions
 . /etc/profile.d/aws-apitools-common.sh
@@ -18,6 +12,7 @@ fi
 . /etc/sysconfig/aws.env
 . /etc/sysconfig/ec2-associate-domain
 
+export HOME=/root/
 NAME=`ec2-tag-search.sh Name`
 PROJECT=`ec2-tag-search.sh Project`
 DOMAIN=`ec2-tag-search.sh Domain`
