@@ -1,0 +1,111 @@
+#! /bin/sh
+# chkconfig: 35 55 25
+# description: ec2-associate-domain
+#
+# ê›íË:
+# 1. install-service.sh ec2-associate-domain
+# 2. vim /etc/sysconfig/ec2-associate-domain
+# 3. vim /root/.aws-secrets
+#
+
+. /etc/init.d/functions
+. /etc/profile.d/aws-apitools-common.sh
+
+if [ ! -f /etc/sysconfig/aws.env ]; then
+    exit 6;
+fi
+
+. /etc/sysconfig/aws.env
+. /etc/sysconfig/ec2-associate-domain
+
+NAME=`ec2-tag-search.sh Name`
+PROJECT=`ec2-tag-search.sh Project`
+DOMAIN=`ec2-tag-search.sh Domain`
+FQDN=$NAME.$PROJECT.$DOMAIN
+
+check_variable() {
+   local name=$1
+   local var=$2
+
+   if [ ${var:-NONE} = "NONE" ]; then
+      echo "$var_name tag can not be found."
+      exit 1;
+   fi
+}
+
+check_variable Name $NAME
+check_variable Project $PROJECT
+check_variable Domain $DOMAIN
+
+update() {
+    local upload_file="/tmp/r53_upload.xml"
+    local action=$1
+    local ip=$2
+
+cat << EOS > $upload_file
+<?xml version="1.0" encoding="UTF-8"?>
+<ChangeResourceRecordSetsRequest xmlns="https://route53.amazonaws.com/doc/2010-10-01/">
+ <ChangeBatch>
+  <Comment>Update A Record of $FQDN</Comment>
+  <Changes>
+   <Change>
+    <Action>$action</Action>
+     <ResourceRecordSet>
+      <Name>$FQDN.</Name>
+      <Type>A</Type>
+      <TTL>$TTL</TTL>
+      <ResourceRecords>
+       <ResourceRecord>
+        <Value>$ip</Value>
+       </ResourceRecord>
+     </ResourceRecords>
+    </ResourceRecordSet>
+   </Change>
+  </Changes>
+ </ChangeBatch>
+</ChangeResourceRecordSetsRequest>
+EOS
+
+    echo "Request XML:"
+    cat $upload_file
+
+    echo "Response XML:"
+    /usr/bin/perl $AWS_TOOLS_HOME/extra/r53/bin/dnscurl.pl \
+        --keyname $KEY_NAME -- \
+        -H "Content-Type: text/xml; charset=UTF-8" \
+        -X POST \
+        --upload-file $upload_file \
+        https://route53.amazonaws.com/2010-10-01/hostedzone/$ZONE_ID/rrset
+
+    local ret=$?
+
+    /bin/rm -rf $upload_file
+
+    return $ret
+}
+
+start() {
+    local action=CREATE
+    local ip=$PUBLIC_IPV4
+    update $action $ip
+    return $?
+}
+
+stop() {
+    local action=DELETE
+    local ip=`/usr/bin/dig $FQDN +short`
+    update $action $ip
+    return $?
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    sleep 3
+    ;;
+  *)
+    echo "Usage $0 [start|stop]"
+esac

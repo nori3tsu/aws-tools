@@ -1,0 +1,7 @@
+# /root/.aws-secretsのキー
+KEY_NAME=
+
+# Route53のManagementConsoleから確認
+ZONE_ID=
+
+TTL=300
