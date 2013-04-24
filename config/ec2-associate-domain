@@ -1,7 +1,8 @@
-# /root/.aws-secrets‚ÌƒL[
+# /root/.aws-secretsã®ã‚­ãƒ¼å
 KEY_NAME=
 
-# Route53‚ÌManagementConsole‚©‚çŠm”F
+# Hosted Zoneã®ID
 ZONE_ID=
 
+# TTL
 TTL=300

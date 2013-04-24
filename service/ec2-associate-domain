@@ -17,6 +17,9 @@ NAME=`ec2-tag-search.sh Name`
 PROJECT=`ec2-tag-search.sh Project`
 DOMAIN=`ec2-tag-search.sh Domain`
 FQDN=$NAME.$PROJECT.$DOMAIN
+VAR_DIR=$AWS_TOOLS_VAR_DIR/ec2-associate-domain
+
+mkdir -p $VAR_DIR
 
 check_variable() {
    local name=$1
@@ -83,13 +86,17 @@ start() {
     local action=CREATE
     local ip=$PUBLIC_IPV4
     update $action $ip
+    
+    echo $ip > $VAR_DIR/associate-ip
+    
     return $?
 }
 
 stop() {
     local action=DELETE
-    local ip=`/usr/bin/dig $FQDN +short`
+    local ip=`cat $VAR_DIR/associate-ip`
     update $action $ip
+    
     return $?
 }
 
