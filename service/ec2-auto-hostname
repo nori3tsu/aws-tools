@@ -1,55 +1,52 @@
 #!/bin/bash
 #
-# ec2
+# ec2-auto-hostname
 #
-# chkconfig:    2345 26 74
+# chkconfig:    2345 50 50
 # description:  -
 # processname:  -
 # config:       -
 # pidfile:      -
 
-# Source function library.
+
 . /etc/rc.d/init.d/functions
-
-# Source networking configuration.
-. /etc/sysconfig/network
-
-# Check that networking is up.
-[ "$NETWORKING" = "no" ] && exit 0
-
 . /etc/profile.d/aws-apitools-common.sh
+
 . /etc/sysconfig/aws.env
 
+. /etc/sysconfig/network
+
 start() {
-   # set hostname of user-data as hostname
-   HOSTNAME=`ec2-tag-search.sh Name`
-   if [ ! -z "$HOSTNAME" ]
-   then
-      /bin/hostname $HOSTNAME
-      /bin/sed -i "s/^\(127.0.0.1.*localhost localhost.localdomain\).*/\1 ${HOSTNAME}/g" /etc/hosts
-   fi
-   return $?
+  HOSTNAME=`ec2-tag-search.sh Name`
+
+  if [ ! -z "$HOSTNAME" ]
+  then
+    /bin/hostname $HOSTNAME
+    /bin/sed -i "s/^\(127.0.0.1.*localhost localhost.localdomain\).*/\1 ${HOSTNAME}/g" /etc/hosts
+  fi
+
+  return $?
 }
 
 stop() {
-   return 0
+  return 0
 }
 
 case "$1" in
-   start)
-      start
-      ;;
-   stop)
-      stop
-      ;;
-   restart)
-      stop
-      start
-      ;;
-   *)
-      echo $"Usage: $0 {start|stop|restart}"
-      exit 1
-      ;;
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
 esac
 
 exit $?

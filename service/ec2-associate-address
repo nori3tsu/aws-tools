@@ -1,32 +1,34 @@
 #! /bin/sh
-# chkconfig: 35 55 25
-# description: ec2-associate-address
+#
+# ec2-associate-address
+#
+# chkconfig:    2345 50 50
+# description:  -
+# processname:  -
+# config:       -
+# pidfile:      -
 
 
 . /etc/init.d/functions
 . /etc/profile.d/aws-apitools-common.sh
-
-if [ ! -f /etc/sysconfig/aws.env ]; then
-    exit 6;
-fi
 
 . /etc/sysconfig/aws.env
 
 EIP=`ec2-tag-search.sh EIP`
 
 if [ ${EIP:-NONE} = "NONE" ]; then
-    echo "EIP tag can not be found."
-    exit 1;
+  echo "EIP tag can not be found."
+  exit 1;
 fi
 
 start() {
-    echo "Start... [instance_id: $INSTANCE_ID, EIP: $EIP"
-    ec2-associate-address -i $INSTANCE_ID $EIP --region ap-northeast-1
+  echo "Start... [instance_id: $INSTANCE_ID, EIP: $EIP"
+  ec2-associate-address -i $INSTANCE_ID $EIP --region ap-northeast-1
 }
 
 stop() {
-    echo "Stop..."
-    ec2-disassociate-address $EIP --region ap-northeast-1
+  echo "Stop..."
+  ec2-disassociate-address $EIP --region ap-northeast-1
 }
 
 case "$1" in
@@ -43,4 +45,6 @@ case "$1" in
     ;;
   *)
     echo "Usage $0 [start|stop|restart]"
+    exit 1;
+    ;;
 esac
